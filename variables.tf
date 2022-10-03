@@ -62,7 +62,8 @@ variable "virtual_network_flow_timeout_in_minutes" {
 }
 
 variable "virtual_network_tags" {
-  description = map(string)
+  description = "Map of tags that will be applied to the virtual network resource"
+  type        = map(string)
   default     = null
 }
 
