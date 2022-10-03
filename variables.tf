@@ -87,9 +87,9 @@ variable "subnet_service_endpoints" {
 }
 
 variable "subnet_service_endpoint_policy_ids" {
-  description = "The list of IDs of Service Endpoint Policies to associate with the subnet."
-  type        = list(string)
-  default     = []
+  description = "Map of subnet names (key) and list of IDs (value) of Service Endpoint Policies to associate with the subnet."
+  type        = map(list(string))
+  default     = {}
 }
 
 variable "subnet_private_endpoint_network_policies_enabled" {
