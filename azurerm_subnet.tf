@@ -21,7 +21,7 @@ resource "azurerm_subnet" "subnet" {
   #Service Enpoints will only be created if subnet name is included in the subnet_service_endpoints map
   service_endpoints = contains(keys(var.subnet_service_endpoints), each.key) ? var.subnet_service_endpoints[each.key] : []
 
-  service_endpoint_policy_ids = contains(keys(var.subnet_service_endpoint_policy_ids), each.key) ? var.subnet_service_endpoints[each.key] : []
+  service_endpoint_policy_ids = contains(keys(var.subnet_service_endpoint_policy_ids), each.key) ? var.subnet_service_endpoint_policy_ids[each.key] : null
 
   private_endpoint_network_policies_enabled     = contains(keys(var.subnet_private_endpoint_network_policies_enabled), each.key) ? var.subnet_private_endpoint_network_policies_enabled[each.key] : true
   private_link_service_network_policies_enabled = contains(keys(var.subnet_private_link_service_network_policies_enabled), each.key) ? var.subnet_private_link_service_network_policies_enabled[each.key] : true
