@@ -30,7 +30,7 @@ variable "virtual_network_ddos_protection_plan" {
   description = "Service that provides DDoS mitigation, requires the ID of the plan and enable/disable statement"
   type = object({
     id     = string
-    enable = boolean
+    enable = bool
   })
   default = null
 
@@ -89,7 +89,7 @@ variable "subnet_service_endpoints" {
   default = {}
 }
 
-variable "subnet_service_endpoint_policy_ids " {
+variable "subnet_service_endpoint_policy_ids" {
   description = "The list of IDs of Service Endpoint Policies to associate with the subnet."
   type        = map(string)
   default     = {}
