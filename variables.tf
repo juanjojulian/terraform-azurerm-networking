@@ -27,12 +27,9 @@ variable "virtual_network_bgp_community" {
 }
 
 variable "virtual_network_ddos_protection_plan" {
-  description = "Service that provides DDoS mitigation, requires the ID of the plan and enable/disable statement"
-  type = object({
-    id     = string
-    enable = bool
-  })
-  default = null
+  description = "Service that provides DDoS mitigation, requires the ID of the plan"
+  type        = string
+  default     = null
 
 }
 
@@ -52,13 +49,13 @@ variable "virtual_network_flow_timeout_in_minutes" {
   description = "The flow timeout in minutes for the Virtual Network, which is used to enable connection tracking for intra-VM flows. Possible values are between 4 and 30 minutes."
   type        = number
   default     = null
-  validation {
-    condition = (
-      var.virtual_network_flow_timeout_in_minutes >= 4 &&
-      var.virtual_network_flow_timeout_in_minutes <= 30
-    )
-    error_message = "Possible values for virtual_network_flow_timeout_in_minutes are between 4 and 30 minutes."
-  }
+  # validation {
+  #   condition = (
+  #     var.virtual_network_flow_timeout_in_minutes >= 4 &&
+  #     var.virtual_network_flow_timeout_in_minutes <= 30
+  #   )
+  #   error_message = "Possible values for virtual_network_flow_timeout_in_minutes are between 4 and 30 minutes."
+  # }
 }
 
 variable "virtual_network_tags" {
