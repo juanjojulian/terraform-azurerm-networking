@@ -67,42 +67,42 @@ variable "virtual_network_tags" {
 //azurerm_subnet variables
 variable "subnets" {
   description = "Map defining the subnets to be deployed, the key is the name of the subnet while the value is a list of address spaces"
-  type        = map(list(string))
-  default     = null
-  validation {
-    condition     = alltrue([for key, value in var.subnets : length(value) > 0 && length(value) < 2])
-    error_message = "Sorry, Azure doesn't support yet multiple address spaces for subnets, please provide a list with only one element"
-  }
+  # type        = map(list(string))
+  default = null
+  # validation {
+  #   condition     = alltrue([for key, value in var.subnets : length(value) > 0 && length(value) < 2])
+  #   error_message = "Sorry, Azure doesn't support yet multiple address spaces for subnets, please provide a list with only one element"
+  # }
 }
 
-variable "subnet_delegations" {
-  description = "Map of subnet names (keys) and subnet delegations (values), please respect subnet delegations formatting as per az network vnet subnet list-available-delegations"
-  type        = map(string)
-  default     = {}
-}
+# variable "subnet_delegations" {
+#   description = "Map of subnet names (keys) and subnet delegations (values), please respect subnet delegations formatting as per az network vnet subnet list-available-delegations"
+#   type        = map(string)
+#   default     = {}
+# }
 
-variable "subnet_service_endpoints" {
-  type    = map(list(string))
-  default = {}
-}
+# variable "subnet_service_endpoints" {
+#   type    = map(list(string))
+#   default = {}
+# }
 
-variable "subnet_service_endpoint_policy_ids" {
-  description = "Map of subnet names (key) and list of IDs (value) of Service Endpoint Policies to associate with the subnet."
-  type        = map(list(string))
-  default     = {}
-}
+# variable "subnet_service_endpoint_policy_ids" {
+#   description = "Map of subnet names (key) and list of IDs (value) of Service Endpoint Policies to associate with the subnet."
+#   type        = map(list(string))
+#   default     = {}
+# }
 
-variable "subnet_private_endpoint_network_policies_enabled" {
-  description = "Enable or Disable network policies for the private endpoint on the subnet"
-  type        = map(bool)
-  default     = {}
-}
+# variable "subnet_private_endpoint_network_policies_enabled" {
+#   description = "Enable or Disable network policies for the private endpoint on the subnet"
+#   type        = map(bool)
+#   default     = {}
+# }
 
-variable "subnet_private_link_service_network_policies_enabled" {
-  description = "Enable or Disable network policies for the private link service on the subnet."
-  type        = map(bool)
-  default     = {}
-}
+# variable "subnet_private_link_service_network_policies_enabled" {
+#   description = "Enable or Disable network policies for the private link service on the subnet."
+#   type        = map(bool)
+#   default     = {}
+# }
 
 
 
@@ -111,185 +111,185 @@ variable "subnet_private_link_service_network_policies_enabled" {
 variable "subnet_delegations_actions" {
   type = map(list(string))
   default = {
-    "Microsoft.Web/serverFarms": [
+    "Microsoft.Web/serverFarms" : [
       "Microsoft.Network/virtualNetworks/subnets/action"
     ],
-    "Microsoft.ContainerInstance/containerGroups": [
+    "Microsoft.ContainerInstance/containerGroups" : [
       "Microsoft.Network/virtualNetworks/subnets/action"
     ],
-    "Microsoft.Netapp/volumes": [
+    "Microsoft.Netapp/volumes" : [
       "Microsoft.Network/networkinterfaces/*",
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.HardwareSecurityModules/dedicatedHSMs": [
+    "Microsoft.HardwareSecurityModules/dedicatedHSMs" : [
       "Microsoft.Network/networkinterfaces/*",
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.ServiceFabricMesh/networks": [
+    "Microsoft.ServiceFabricMesh/networks" : [
       "Microsoft.Network/virtualNetworks/subnets/action"
     ],
-    "Microsoft.Logic/integrationServiceEnvironments": [
+    "Microsoft.Logic/integrationServiceEnvironments" : [
       "Microsoft.Network/virtualNetworks/subnets/action"
     ],
-    "Microsoft.Batch/batchAccounts": [
+    "Microsoft.Batch/batchAccounts" : [
       "Microsoft.Network/virtualNetworks/subnets/action"
     ],
-    "Microsoft.Sql/managedInstances": [
+    "Microsoft.Sql/managedInstances" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action",
       "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action",
       "Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action"
     ],
-    "Microsoft.Web/hostingEnvironments": [
+    "Microsoft.Web/hostingEnvironments" : [
       "Microsoft.Network/virtualNetworks/subnets/action"
     ],
-    "Microsoft.BareMetal/CrayServers": [
+    "Microsoft.BareMetal/CrayServers" : [
       "Microsoft.Network/networkinterfaces/*",
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.Databricks/workspaces": [
+    "Microsoft.Databricks/workspaces" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action",
       "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action",
       "Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action"
     ],
-    "Microsoft.BareMetal/AzureHostedService": [
+    "Microsoft.BareMetal/AzureHostedService" : [
       "Microsoft.Network/networkinterfaces/*",
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.BareMetal/AzureVMware": [
+    "Microsoft.BareMetal/AzureVMware" : [
       "Microsoft.Network/networkinterfaces/*",
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.StreamAnalytics/streamingJobs": [
+    "Microsoft.StreamAnalytics/streamingJobs" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.DBforPostgreSQL/serversv2": [
+    "Microsoft.DBforPostgreSQL/serversv2" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.AzureCosmosDB/clusters": [
+    "Microsoft.AzureCosmosDB/clusters" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.MachineLearningServices/workspaces": [
+    "Microsoft.MachineLearningServices/workspaces" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.DBforPostgreSQL/singleServers": [
+    "Microsoft.DBforPostgreSQL/singleServers" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.DBforPostgreSQL/flexibleServers": [
+    "Microsoft.DBforPostgreSQL/flexibleServers" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.DBforMySQL/serversv2": [
+    "Microsoft.DBforMySQL/serversv2" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.DBforMySQL/flexibleServers": [
+    "Microsoft.DBforMySQL/flexibleServers" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.ApiManagement/service": [
+    "Microsoft.ApiManagement/service" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action",
       "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action"
     ],
-    "Microsoft.Synapse/workspaces": [
+    "Microsoft.Synapse/workspaces" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.PowerPlatform/vnetaccesslinks": [
+    "Microsoft.PowerPlatform/vnetaccesslinks" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.Network/dnsResolvers": [
+    "Microsoft.Network/dnsResolvers" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.Kusto/clusters": [
+    "Microsoft.Kusto/clusters" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action",
       "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action",
       "Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action"
     ],
-    "Microsoft.DelegatedNetwork/controller": [
+    "Microsoft.DelegatedNetwork/controller" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.ContainerService/managedClusters": [
+    "Microsoft.ContainerService/managedClusters" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.PowerPlatform/enterprisePolicies": [
+    "Microsoft.PowerPlatform/enterprisePolicies" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.StoragePool/diskPools": [
+    "Microsoft.StoragePool/diskPools" : [
       "Microsoft.Network/virtualNetworks/read"
     ],
-    "Microsoft.DocumentDB/cassandraClusters": [
+    "Microsoft.DocumentDB/cassandraClusters" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.Apollo/npu": [
+    "Microsoft.Apollo/npu" : [
       "Microsoft.Network/networkinterfaces/*",
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.AVS/PrivateClouds": [
+    "Microsoft.AVS/PrivateClouds" : [
       "Microsoft.Network/networkinterfaces/*"
     ],
-    "Microsoft.Orbital/orbitalGateways": [
+    "Microsoft.Orbital/orbitalGateways" : [
       "Microsoft.Network/publicIPAddresses/join/action",
       "Microsoft.Network/virtualNetworks/subnets/join/action",
       "Microsoft.Network/virtualNetworks/read",
       "Microsoft.Network/publicIPAddresses/read"
     ],
-    "Microsoft.Singularity/accounts/jobs": [
+    "Microsoft.Singularity/accounts/jobs" : [
       "Microsoft.Network/networkinterfaces/*",
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.Singularity/accounts/models": [
+    "Microsoft.Singularity/accounts/models" : [
       "Microsoft.Network/networkinterfaces/*",
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.Singularity/accounts/npu": [
+    "Microsoft.Singularity/accounts/npu" : [
       "Microsoft.Network/networkinterfaces/*",
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.AISupercomputer/accounts/jobs": [
+    "Microsoft.AISupercomputer/accounts/jobs" : [
       "Microsoft.Network/networkinterfaces/*",
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.AISupercomputer/accounts/models": [
+    "Microsoft.AISupercomputer/accounts/models" : [
       "Microsoft.Network/networkinterfaces/*",
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.AISupercomputer/accounts/npu": [
+    "Microsoft.AISupercomputer/accounts/npu" : [
       "Microsoft.Network/networkinterfaces/*",
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.LabServices/labplans": [
+    "Microsoft.LabServices/labplans" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.Fidalgo/networkSettings": [
+    "Microsoft.Fidalgo/networkSettings" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.DevCenter/networkConnection": [
+    "Microsoft.DevCenter/networkConnection" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "NGINX.NGINXPLUS/nginxDeployments": [
+    "NGINX.NGINXPLUS/nginxDeployments" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.CloudTest/pools": [
+    "Microsoft.CloudTest/pools" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.CloudTest/hostedpools": [
+    "Microsoft.CloudTest/hostedpools" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.CloudTest/images": [
+    "Microsoft.CloudTest/images" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.Codespaces/plans": [
+    "Microsoft.Codespaces/plans" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "PaloAltoNetworks.Cloudngfw/firewalls": [
+    "PaloAltoNetworks.Cloudngfw/firewalls" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Qumulo.Storage/fileSystems": [
+    "Qumulo.Storage/fileSystems" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.App/testClients": [
+    "Microsoft.App/testClients" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.App/environments": [
+    "Microsoft.App/environments" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
-    "Microsoft.ServiceNetworking/trafficControllers": [
+    "Microsoft.ServiceNetworking/trafficControllers" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ]
   }
