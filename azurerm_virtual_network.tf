@@ -2,7 +2,7 @@ resource "azurerm_virtual_network" "virtual_network" {
   name                    = var.virtual_network_name
   resource_group_name     = var.resource_group_name
   address_space           = var.virtual_network_address_space
-  location                = var.virtual_network_location
+  location                = var.location
   bgp_community           = var.virtual_network_bgp_community
   dns_servers             = var.virtual_network_dns_servers
   edge_zone               = var.virtual_network_edge_zone

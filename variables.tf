@@ -1,7 +1,71 @@
 //Common variables
 variable "resource_group_name" {
-  description = "The name of the resource group in which to create the virtual network."
+  description = "The name of the resource group in which to create the virtual network. This module will NOT create a resource group."
   type        = string
+}
+
+variable "location" {
+  description = "The location/region where all resources will be created. Changing this forces a new resource to be created."
+  type        = string
+}
+
+//azurerm_route_table variables
+variable "route_table" {
+  description = "Map of azurerm_route_table options, if not null a new azurerm_route_table will be created"
+  type = object({
+    name                          = optional(string)
+    disable_bgp_route_propagation = optional(bool, false)
+    routes                        = optional(map(map(string)))
+    tags                          = optional(map(string), null)
+  })
+  default = null
+}
+
+//azurerm_nat_gateway variables
+variable "nat_gateway" {
+  description = "Map of azurerm_nat_gateway options, if not null a new azurerm_nat_gateway will be created"
+  type = object({
+    name                    = optional(string)
+    idle_timeout_in_minutes = optional(number, 4)
+    sku_name                = optional(string, "Standard")
+    zones                   = optional(list(string), null)
+    tags                    = optional(map(string), null)
+    public_ip               = optional(number)
+    public_ip_prefix        = optional(map(number))
+  })
+  default = null
+}
+
+//azurerm_network_security_group variables
+variable "network_security_group" {
+  description = "Map of azurerm_network_security_group options, if not null a new azurerm_network_security_group will be created"
+  type = object({
+    name = optional(string)
+    tags = optional(map(string), null)
+  })
+  default = null
+}
+variable "nsg_rules" {
+  description = "List of azurerm_network_security_rule"
+  type = list(object({
+    access                                     = string
+    direction                                  = string
+    name                                       = string
+    priority                                   = number
+    protocol                                   = string
+    description                                = optional(string, null)
+    destination_address_prefix                 = optional(string)
+    destination_address_prefixes               = optional(list(string))
+    destination_application_security_group_ids = optional(list(string))
+    destination_port_range                     = optional(string)
+    destination_port_ranges                    = optional(list(string))
+    source_address_prefix                      = optional(string)
+    source_address_prefixes                    = optional(list(string))
+    source_application_security_group_ids      = optional(list(string))
+    source_port_range                          = optional(string, "*")
+    source_port_ranges                         = optional(list(string))
+  }))
+  default = null
 }
 
 //azurerm_virtual_network variables
@@ -11,13 +75,8 @@ variable "virtual_network_name" {
 }
 
 variable "virtual_network_address_space" {
-  description = "The address space that is used the virtual network."
+  description = "The address space used by the virtual network."
   type        = list(string)
-}
-
-variable "virtual_network_location" {
-  description = "The location/region where the virtual network is created. Changing this forces a new resource to be created."
-  type        = string
 }
 
 variable "virtual_network_bgp_community" {
@@ -49,13 +108,14 @@ variable "virtual_network_flow_timeout_in_minutes" {
   description = "The flow timeout in minutes for the Virtual Network, which is used to enable connection tracking for intra-VM flows. Possible values are between 4 and 30 minutes."
   type        = number
   default     = null
-  # validation {
-  #   condition = (
-  #     var.virtual_network_flow_timeout_in_minutes >= 4 &&
-  #     var.virtual_network_flow_timeout_in_minutes <= 30
-  #   )
-  #   error_message = "Possible values for virtual_network_flow_timeout_in_minutes are between 4 and 30 minutes."
-  # }
+  validation {
+    condition = (
+      var.virtual_network_flow_timeout_in_minutes == null ||
+      (coalesce(var.virtual_network_flow_timeout_in_minutes, 0) >= 4 &&
+      coalesce(var.virtual_network_flow_timeout_in_minutes, 40) <= 30)
+    )
+    error_message = "Possible values for virtual_network_flow_timeout_in_minutes are: null or a number between 4 and 30 minutes."
+  }
 }
 
 variable "virtual_network_tags" {
@@ -64,49 +124,60 @@ variable "virtual_network_tags" {
   default     = null
 }
 
+// azurerm_virtual_network_peering variables
+variable "peerings" {
+  description = "Map of peerings, the key is the name of the peering"
+  type = map(object({
+    remote_virtual_network_id    = string
+    allow_virtual_network_access = optional(bool, true)
+    allow_forwarded_traffic      = optional(bool, false)
+    allow_gateway_transit        = optional(bool, false)
+    use_remote_gateways          = optional(bool, false)
+  }))
+  default = null
+}
+
+// azurerm_bastion_host and associated resources variables
+variable "bastion" {
+  description = "Bastion to be attached to the vnet and its options, if not null a new Azure Bastion plus a Bastion Subnet will be created."
+  type = object({
+    AzureBastionSubnet     = string
+    name                   = optional(string)
+    public_ip_name         = optional(string)
+    sku                    = optional(string, "Basic")
+    copy_paste_enabled     = optional(bool, true)
+    file_copy_enabled      = optional(bool, false)
+    ip_connect_enabled     = optional(bool, false)
+    scale_units            = optional(number, 2)
+    shareable_link_enabled = optional(bool, false)
+    tunneling_enabled      = optional(bool, false)
+    tags                   = optional(map(string), null)
+  })
+  default = null
+}
+
 //azurerm_subnet variables
 variable "subnets" {
   description = "Map defining the subnets to be deployed, the key is the name of the subnet while the value is a list of address spaces"
-  # type        = map(list(string))
-  default = null
-  # validation {
-  #   condition     = alltrue([for key, value in var.subnets : length(value) > 0 && length(value) < 2])
-  #   error_message = "Sorry, Azure doesn't support yet multiple address spaces for subnets, please provide a list with only one element"
-  # }
+  type = map(object({
+    address_prefixes                              = list(string)
+    delegation                                    = optional(string, "")
+    service_endpoints                             = optional(list(string), [])
+    service_endpoint_policy_ids                   = optional(list(string), null)
+    private_endpoint_network_policies_enabled     = optional(bool, true)
+    private_link_service_network_policies_enabled = optional(bool, true)
+    nat_gateway                                   = optional(string, null)
+    route_table                                   = optional(string, null)
+    network_security_group                        = optional(string, null)
+  }))
+  validation {
+    condition     = alltrue([for key, value in var.subnets : length(value.address_prefixes) > 0 && length(value.address_prefixes) < 2])
+    error_message = "Sorry, Azure doesn't support yet multiple address spaces for subnets, please provide a list with only one element"
+  }
 }
 
-# variable "subnet_delegations" {
-#   description = "Map of subnet names (keys) and subnet delegations (values), please respect subnet delegations formatting as per az network vnet subnet list-available-delegations"
-#   type        = map(string)
-#   default     = {}
-# }
 
-# variable "subnet_service_endpoints" {
-#   type    = map(list(string))
-#   default = {}
-# }
-
-# variable "subnet_service_endpoint_policy_ids" {
-#   description = "Map of subnet names (key) and list of IDs (value) of Service Endpoint Policies to associate with the subnet."
-#   type        = map(list(string))
-#   default     = {}
-# }
-
-# variable "subnet_private_endpoint_network_policies_enabled" {
-#   description = "Enable or Disable network policies for the private endpoint on the subnet"
-#   type        = map(bool)
-#   default     = {}
-# }
-
-# variable "subnet_private_link_service_network_policies_enabled" {
-#   description = "Enable or Disable network policies for the private link service on the subnet."
-#   type        = map(bool)
-#   default     = {}
-# }
-
-
-
-//This variable has to be kept updated with the output of `az network vnet subnet list-available-delegations --location westeurope | jq 'to_entries | map( {(.value.serviceName) : .value.actions } ) | add'`
+//Unfortunately this variable has to be kept updated with the output of `az network vnet subnet list-available-delegations --location westeurope | jq 'to_entries | map( {(.value.serviceName) : .value.actions } ) | add'`
 //Reason https://github.com/terraform-providers/terraform-provider-azurerm/issues/5975
 variable "subnet_delegations_actions" {
   type = map(list(string))
@@ -183,6 +254,9 @@ variable "subnet_delegations_actions" {
     "Microsoft.DBforMySQL/flexibleServers" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
+    "Microsoft.DBforMySQL/servers" : [
+      "Microsoft.Network/virtualNetworks/subnets/join/action"
+    ],
     "Microsoft.ApiManagement/service" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action",
       "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action"
@@ -229,27 +303,11 @@ variable "subnet_delegations_actions" {
       "Microsoft.Network/virtualNetworks/read",
       "Microsoft.Network/publicIPAddresses/read"
     ],
-    "Microsoft.Singularity/accounts/jobs" : [
-      "Microsoft.Network/networkinterfaces/*",
-      "Microsoft.Network/virtualNetworks/subnets/join/action"
-    ],
-    "Microsoft.Singularity/accounts/models" : [
+    "Microsoft.Singularity/accounts/networks" : [
       "Microsoft.Network/networkinterfaces/*",
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
     "Microsoft.Singularity/accounts/npu" : [
-      "Microsoft.Network/networkinterfaces/*",
-      "Microsoft.Network/virtualNetworks/subnets/join/action"
-    ],
-    "Microsoft.AISupercomputer/accounts/jobs" : [
-      "Microsoft.Network/networkinterfaces/*",
-      "Microsoft.Network/virtualNetworks/subnets/join/action"
-    ],
-    "Microsoft.AISupercomputer/accounts/models" : [
-      "Microsoft.Network/networkinterfaces/*",
-      "Microsoft.Network/virtualNetworks/subnets/join/action"
-    ],
-    "Microsoft.AISupercomputer/accounts/npu" : [
       "Microsoft.Network/networkinterfaces/*",
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
@@ -290,6 +348,12 @@ variable "subnet_delegations_actions" {
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ],
     "Microsoft.ServiceNetworking/trafficControllers" : [
+      "Microsoft.Network/virtualNetworks/subnets/join/action"
+    ],
+    "GitHub.Network/networkSettings" : [
+      "Microsoft.Network/virtualNetworks/subnets/join/action"
+    ],
+    "Microsoft.Network/networkWatchers" : [
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ]
   }

@@ -49,3 +49,23 @@ output "subnet_address_prefixes" {
     subnet.name => subnet.address_prefixes
   }
 }
+
+//azurerm_nat_gateway
+output "nat_gateway_id" {
+  description = "Outputs the ID for azurerm_nat_gateway"
+  value       = length(azurerm_nat_gateway.nat_gateway) > 0 ? azurerm_nat_gateway.nat_gateway[0].id : ""
+}
+output "nat_gateway_resource_guid" {
+  description = "Outputs the GUID for azurerm_nat_gateway"
+  value       = length(azurerm_nat_gateway.nat_gateway) > 0 ? azurerm_nat_gateway.nat_gateway[0].resource_guid : ""
+}
+
+//azurerm_route_table
+output "route_table_id" {
+  description = "Outputs the ID for azurerm_route_table"
+  value       = length(azurerm_route_table.route_table) > 0 ? azurerm_route_table.route_table[0].id : ""
+}
+output "route_table_subnets" {
+  description = "Outputs The collection of Subnets associated with the route table."
+  value       = length(azurerm_route_table.route_table) > 0 ? azurerm_route_table.route_table[0].subnets : []
+}
