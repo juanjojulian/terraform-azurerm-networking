@@ -42,29 +42,25 @@ variable "network_security_group" {
   type = object({
     name = optional(string)
     tags = optional(map(string), null)
+    rules = optional(list(object({
+      access                                     = string
+      direction                                  = string
+      name                                       = string
+      priority                                   = number
+      protocol                                   = string
+      description                                = optional(string, null)
+      destination_address_prefix                 = optional(string, null)
+      destination_address_prefixes               = optional(list(string))
+      destination_application_security_group_ids = optional(list(string))
+      destination_port_range                     = optional(string, null)
+      destination_port_ranges                    = optional(list(string))
+      source_address_prefix                      = optional(string, "*")
+      source_address_prefixes                    = optional(list(string), null)
+      source_application_security_group_ids      = optional(list(string), null)
+      source_port_range                          = optional(string, null)
+      source_port_ranges                         = optional(list(string), null)
+    })), null)
   })
-  default = null
-}
-variable "nsg_rules" {
-  description = "List of azurerm_network_security_rule"
-  type = list(object({
-    access                                     = string
-    direction                                  = string
-    name                                       = string
-    priority                                   = number
-    protocol                                   = string
-    description                                = optional(string, null)
-    destination_address_prefix                 = optional(string)
-    destination_address_prefixes               = optional(list(string))
-    destination_application_security_group_ids = optional(list(string))
-    destination_port_range                     = optional(string)
-    destination_port_ranges                    = optional(list(string))
-    source_address_prefix                      = optional(string)
-    source_address_prefixes                    = optional(list(string))
-    source_application_security_group_ids      = optional(list(string))
-    source_port_range                          = optional(string, "*")
-    source_port_ranges                         = optional(list(string))
-  }))
   default = null
 }
 
@@ -83,6 +79,13 @@ variable "virtual_network_bgp_community" {
   description = "The BGP community attribute in format <as-number>:<community-value>."
   type        = string
   default     = null
+  validation {
+    condition = (
+      var.virtual_network_bgp_community == null ||
+      (startswith(coalesce(var.virtual_network_bgp_community, "1:"), "12076:") && split(":", coalesce(var.virtual_network_bgp_community, "2:2"))[1] >= 20000 && split(":", coalesce(var.virtual_network_bgp_community, "2:2"))[1] <= 49999)
+    )
+    error_message = "Community value must start with \"12076:\" followed by a value between 20000 and 49999."
+  }
 }
 
 variable "virtual_network_ddos_protection_plan" {
@@ -130,7 +133,7 @@ variable "peerings" {
   type = map(object({
     remote_virtual_network_id    = string
     allow_virtual_network_access = optional(bool, true)
-    allow_forwarded_traffic      = optional(bool, false)
+    allow_forwarded_traffic      = optional(bool, false) //This one is true by default in Azure Portal but false in azurerm, not nice.
     allow_gateway_transit        = optional(bool, false)
     use_remote_gateways          = optional(bool, false)
   }))

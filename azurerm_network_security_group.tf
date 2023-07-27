@@ -18,7 +18,7 @@ resource "azurerm_subnet_network_security_group_association" "external_network_s
 }
 
 resource "azurerm_network_security_rule" "network_security_rule" {
-  for_each                                   = (var.nsg_rules != null && var.network_security_group != null) ? { for value in var.nsg_rules : value.name => value } : {}
+  for_each                                   = (var.network_security_group.rules != null && var.network_security_group != null) ? { for value in var.network_security_group.rules : value.name => value } : {}
   access                                     = each.value.access
   direction                                  = each.value.direction
   name                                       = each.value.name
@@ -27,14 +27,14 @@ resource "azurerm_network_security_rule" "network_security_rule" {
   protocol                                   = each.value.protocol
   resource_group_name                        = var.resource_group_name
   description                                = each.value.description
-  destination_address_prefix                 = lookup(each.value, "destination_application_security_group_ids", null) == null && lookup(each.value, "destination_address_prefixes", null) == null ? lookup(each.value, "destination_address_prefix", "*") : null
-  destination_address_prefixes               = lookup(each.value, "destination_application_security_group_ids", null) == null ? lookup(each.value, "destination_address_prefixes", null) : null
-  destination_application_security_group_ids = lookup(each.value, "destination_application_security_group_ids", null)
+  destination_address_prefix                 = each.value.destination_application_security_group_ids == null && each.value.destination_address_prefixes == null ? each.value.destination_address_prefix : null
+  destination_address_prefixes               = each.value.destination_application_security_group_ids == null ? each.value.destination_address_prefixes : null
+  destination_application_security_group_ids = each.value.destination_application_security_group_ids
   destination_port_range                     = each.value.destination_port_range
-  destination_port_ranges                    = lookup(each.value, "destination_port_range", null) == null ? each.value.destination_port_ranges : null
-  source_address_prefix                      = lookup(each.value, "source_application_security_group_ids", null) == null && lookup(each.value, "source_address_prefixes", null) == null ? lookup(each.value, "source_address_prefix", "*") : null
-  source_address_prefixes                    = lookup(each.value, "source_application_security_group_ids", null) == null ? lookup(each.value, "source_address_prefixes", null) : null
-  source_application_security_group_ids      = lookup(each.value, "source_application_security_group_ids", null)
-  source_port_range                          = lookup(each.value, "source_port_range", "*") == "*" ? "*" : null
-  source_port_ranges                         = lookup(each.value, "source_port_range", "*") == "*" ? null : [for port in split(",", each.value.source_port_range) : trimspace(port)]
+  destination_port_ranges                    = each.value.destination_port_range == null ? each.value.destination_port_ranges : null
+  source_address_prefix                      = each.value.source_application_security_group_ids == null && each.value.source_address_prefixes == null ? each.value.source_address_prefix : null
+  source_address_prefixes                    = each.value.source_application_security_group_ids == null ? each.value.source_address_prefixes : null
+  source_application_security_group_ids      = each.value.source_application_security_group_ids
+  source_port_range                          = (each.value.source_port_range == null && each.value.source_port_ranges == null) ? "*" : each.value.source_port_range
+  source_port_ranges                         = each.value.source_port_range == null ? each.value.source_port_ranges : null
 }

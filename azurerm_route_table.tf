@@ -5,16 +5,6 @@ resource "azurerm_route_table" "route_table" {
   resource_group_name           = var.resource_group_name
   disable_bgp_route_propagation = var.route_table.disable_bgp_route_propagation
 
-  dynamic "route" {
-    for_each = var.route_table.routes != "" && var.route_table.routes != null ? var.route_table.routes : {}
-    content {
-      name                   = route.key
-      address_prefix         = route.value.address_prefix
-      next_hop_type          = route.value.next_hop_type
-      next_hop_in_ip_address = route.value.next_hop_in_ip_address
-    }
-  }
-
   tags = var.route_table.tags
 }
 
@@ -27,4 +17,14 @@ resource "azurerm_subnet_route_table_association" "external_route_table_associat
   for_each       = { for key, value in var.subnets : key => value if try(value.route_table, "") != "module" && try(value.route_table, "") != null }
   subnet_id      = azurerm_subnet.subnet[each.key].id
   route_table_id = each.value.route_table
+}
+
+resource "azurerm_route" "route" {
+  for_each               = try(var.route_table.routes, {}) != {} && try(var.route_table.routes, null) != null ? var.route_table.routes : {}
+  name                   = each.key
+  resource_group_name    = var.resource_group_name
+  route_table_name       = azurerm_route_table.route_table[0].name
+  address_prefix         = each.value.address_prefix
+  next_hop_type          = each.value.next_hop_type
+  next_hop_in_ip_address = each.value.next_hop_in_ip_address
 }

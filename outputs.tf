@@ -66,6 +66,16 @@ output "route_table_id" {
   value       = length(azurerm_route_table.route_table) > 0 ? azurerm_route_table.route_table[0].id : ""
 }
 output "route_table_subnets" {
-  description = "Outputs The collection of Subnets associated with the route table."
+  description = "Outputs the collection of subnets associated with the route table."
   value       = length(azurerm_route_table.route_table) > 0 ? azurerm_route_table.route_table[0].subnets : []
+}
+
+//azurerm_network_security_group
+output "network_security_group_id" {
+  description = "Outputs the ID for azurerm_network_security_group"
+  value       = length(azurerm_network_security_group.network_security_group) > 0 ? azurerm_network_security_group.network_security_group[0].id : ""
+}
+output "network_security_rule_id" {
+  description = "Outputs the list of azurerm_network_security_rule ids"
+  value       = [for rule in azurerm_network_security_rule.network_security_rule : rule.id]
 }
